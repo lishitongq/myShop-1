@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class userController extends Controller
 {
     public function index(){
-    	
+    	echo 1111;
     	return view('welcome');
     }
 }
