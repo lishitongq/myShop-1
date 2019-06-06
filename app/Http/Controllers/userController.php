@@ -16,6 +16,8 @@ class userController extends Controller
 
     public function add(){
     	return view('addStudent');
+    	echo 1111;
+    	return view('welcome');
     }
 
     public function do_add(Request $request){
