@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>新增学生</title>
+</head>
+<body>
+	@if($errors->any())
+		@foreach($errors->all() as $error)
+			{{$error}}
+		@endforeach
+	@endif
+	<form method="post" action="{{ url('/do_add') }}" >
+		@csrf
+		姓名：<input type="text" name="name"><br/>
+		年龄：<input type="text" name="age"><br/>
+		班级：<input type="text" name="class"><br/>
+		<input type="radio" name="sex" value="1"> 男
+		<input type="radio" name="sex" value="2">	女	
+		<br/>
+		<input type="submit" name="提交">
+	</form>
+</body>
+</html>
