@@ -18,6 +18,9 @@ Route::any('/', function () {
 Route::get('/add_student','studentController@index'); //学生增删改查主页面
 Route::get('/add','studentController@add');
 Route::post('/do_add','studentController@do_add');
+Route::get('/update_student','studentController@update');
+Route::post('/do_update','studentController@do_update');
+Route::get('/del','studentController@del');
 
 // Route::get('/user','userController@index');
 // Route::get('/add_user','userController@add');
