@@ -11,13 +11,22 @@
 |
 */
 
-Route::any('/', function () {
-    return view('welcome');
+Route::get('/','IndexController@index');
+Route::middleware(['login'])->group(function(){
+	Route::get('/order','Home\OrderController@index');
 });
 
-Route::middleware(['stu'])->group(function(){
-	Route::get('/add_student','studentController@index'); //学生增删改查主页面
-});
+Route::get('login','LoginController@login'); //登录
+Route::get('do_login','LoginController@do_login'); //登录表单提交验证
+Route::get('register'); //注册
+Route::get('do_register'); //表单验证
+Route::get('logout','LoginController@logout'); //退出
+
+
+
+// Route::middleware(['stu'])->group(function(){
+// 	Route::get('/add_student','studentController@index'); //学生增删改查主页面
+// });
 
 
 Route::get('/add','studentController@add');

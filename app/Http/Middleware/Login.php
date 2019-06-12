@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 
-class stu
+class Login
 {
     /**
      * Handle an incoming request.
@@ -15,12 +15,12 @@ class stu
      */
     public function handle($request, Closure $next)
     {
-        //echo "kgkgkgkkgk";  //前置
+        echo 1111;
         var_dump(session('name'));
-        $response =  $next($request);
-
-        echo "gggggggggggggggggggggg";  //后置
-
-        return $response;
+        die();
+        if(!$request->session()->exists('name')){
+            return redirect('/login');
+        }
+        return $next($request);
     }
 }
