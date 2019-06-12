@@ -3,15 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Tools\Tools;
 
 use DB;
 
 class studentController extends Controller
 {
+    public $tools;
+    public $redis;
+    public function __construct(Tools $tools){
+        $this->tools = $tools;
+        $this->redis = $tools->getRedis();
+    }
     public function index(Request $request){
+        //$redis = $this->tools->getRedis();
+        //$re = $redis -> exists('num');
+        //$redis->del('num');
+        ////$re = $redis -> exists('num');
+        //$redis->incr('num');
+    
         $req = $request->all();
         
-    	//$student_info = DB::table('student')->get()->toArray();
+    	$student_info = DB::table('student')->first();
+
         //
         //var_dump(isset($req['find_name']));
         if(isset($req['find_name'])){
@@ -21,12 +35,19 @@ class studentController extends Controller
         $req['find_name'] = '';
         $student_info = DB::table('student')->paginate(1); 
       }
-        
-    	
+        $stu_info = $student_info->toArray();
+        $stu_json = json_encode($stu_info);
+        //var_dump($stu_json);
+    	$this->redis->set('stu_info',$stu_json,10);
+
     	return view('addStudent',['student_info'=>$student_info,'find_name'=>$req['find_name']]);  
     }
 
     public function add(){
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1','6379');
+        $num = $redis->get('num');
+        echo $num."<br/>";
     	return view('add');
     }
 
