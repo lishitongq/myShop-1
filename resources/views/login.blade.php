@@ -2,10 +2,10 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>用户登录</title>
+	<title>微商城-登录</title>
 </head>
 <body>
-	<form action="{{url('/do_login')}}" methos="post">
+	<form action="{{url('/do_login')}}" method="post">
 		<table border="1" width="400" align="center">
 			<caption><h3>登录页面</h3></caption>
 				@csrf

@@ -12,21 +12,50 @@ class LoginController extends Controller
     	return view('login');
     }
     public function do_login(Request $request){
-    	$req = $request->all();
-
-    	$user_info = User::where(['name'=>$req['name'],'password'=>$req['password']])->first();
-    	//dd($user_info);
-    	//$user = $user_info->toArray();
-    	if(!empty($user_info)){
-    		//发放权限，写入session
-    		session(['name'=>$req['name']]);
-    		//$request->session()->put('name', $req['name']);
-    		//echo $request->session()->exists('name')."<br>";
-    		return redirect('/');
-    	}else{
-    		echo 1111;
-    	}
+    	$validatedData = $request->validate([
+            'name' => 'required',
+            'password' => 'required'
+        ]);
+        $req = $request->all();
+        $user_info = User::where(['name'=>$req['name'],'password'=>md5($req['password'])])
+        ->select('id','name')
+        ->first();
+        if(empty($user_info)){
+            echo '用户或密码错误！';
+            die();
+        }
+        $user = [
+            'id'=>$user_info['id'],
+            'user_name'=>$user_info['name']
+        ];
+        session(['user'=>$user]);
+        return redirect('/');
     	
+    }
+
+    public function register(){
+        return view('register');
+    }
+
+    public function do_register(Request $request){
+        $validatedData = $request->validate([
+            'name' => 'required',
+            'password' => 'required',
+            'confirm_password' => 'same:password',
+        ]);
+
+        $req = $request->all();
+        $add_result = User::insert([
+            'name'=>$req['name'],
+            'password'=>md5($req['password']),
+            'reg_time'=>time()
+            
+        ]);
+        if($add_result){
+            return redirect('/login');
+        }else{
+            echo "注册失败！";
+        }
     }
 
     public function logout(Request $request){

@@ -16,10 +16,13 @@ Route::middleware(['login'])->group(function(){
 	Route::get('/order','Home\OrderController@index');
 });
 
+Route::get('/add_goods','Admin\GoodsController@add_goods');
+Route::post('/do_add_goods','Admin\GoodsController@do_add_goods');
+
 Route::get('login','LoginController@login'); //登录
-Route::get('do_login','LoginController@do_login'); //登录表单提交验证
-Route::get('register'); //注册
-Route::get('do_register'); //表单验证
+Route::post('do_login','LoginController@do_login'); //登录表单提交验证
+Route::get('register','LoginController@register'); //注册
+Route::post('do_register','LoginController@do_register'); //表单验证
 Route::get('logout','LoginController@logout'); //退出
 
 
