@@ -12,6 +12,7 @@ class GoodsController extends Controller
     }
     public function do_add_goods(Request $request){
     	//goods/or4QMjUOfSPCvz9Q5G7acZlnMp674IgMfn4SNVD6.jpeg
+    	
 		$path = $request->file('goods_source')->store('goods');
 		echo asset('storage'.'/'.$path);
 		

@@ -5,7 +5,7 @@
 @section('body')
 
 
-	<h1>1111</h1>
+	<h1>{{ $str }}</h1>
 
 	<table border="1">
 		<tr>

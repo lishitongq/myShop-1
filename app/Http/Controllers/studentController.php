@@ -16,15 +16,23 @@ class studentController extends Controller
         $this->redis = $tools->getRedis();
     }
     public function index(Request $request){
+        // DB::connection()->enableQueryLog();
+
+        // $info = DB::table("student")->
+        // leftJoin('class','class.id','=','student.class_id')->get();
+        
+        //  $log = DB::getQueryLog();
+
+        // dd($log);
         //$redis = $this->tools->getRedis();
         //$re = $redis -> exists('num');
         //$redis->del('num');
         ////$re = $redis -> exists('num');
         //$redis->incr('num');
-    
+        
         $req = $request->all();
         
-    	$student_info = DB::table('student')->first();
+    	
 
         //
         //var_dump(isset($req['find_name']));
@@ -33,8 +41,15 @@ class studentController extends Controller
           $student_info = DB::table('student')->where('name', 'like', '%'.$req['find_name'].'%')->paginate(1);   
       }else{
         $req['find_name'] = '';
+
         $student_info = DB::table('student')->paginate(1); 
       }
+      
+        // $log = DB::getQueryLog();
+
+        // dd($log);
+        
+        
         $stu_info = $student_info->toArray();
         $stu_json = json_encode($stu_info);
         //var_dump($stu_json);
@@ -60,6 +75,7 @@ class studentController extends Controller
 
     public function do_update(Request $request){
         $req = $request->all();
+
         $result = DB::table('student')->where(['id'=>$req['id']])->update([
             'name'=>$req['name'],
             'sex'=>$req['sex'],
@@ -87,6 +103,8 @@ class studentController extends Controller
 
     public function do_add(Request $request){
     	$req = $request->all();
+        $req['name'] = $_POST['name'];
+        
     	// $validatedData = $request->validate([
      //    	'name' => 'required',
      //    	'age' => 'required',

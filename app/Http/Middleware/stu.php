@@ -16,7 +16,7 @@ class stu
     public function handle($request, Closure $next)
     {
         //echo "kgkgkgkkgk";  //前置
-        var_dump(session('name'));
+        
         $response =  $next($request);
 
         echo "gggggggggggggggggggggg";  //后置

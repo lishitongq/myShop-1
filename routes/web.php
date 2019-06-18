@@ -27,9 +27,9 @@ Route::get('logout','LoginController@logout'); //退出
 
 
 
-// Route::middleware(['stu'])->group(function(){
-// 	Route::get('/add_student','studentController@index'); //学生增删改查主页面
-// });
+Route::middleware(['stu'])->group(function(){
+	Route::get('/add_student','studentController@index'); //学生增删改查主页面
+});
 
 
 Route::get('/add','studentController@add');
