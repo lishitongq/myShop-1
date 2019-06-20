@@ -9,7 +9,14 @@
 
 		@csrf
 
-		<input type="file" name="goods_source" >
+		商品名称：<input type="text" name="goods_name"><br/>
+
+		<br/>
+		<input type="file" name="goods_source" ><br/>
+		<br/>
+		商品价格：<input type="text" name="price"><br/>
+
+		<br/>
 
 		<input type="submit" name="" value="提交">
 		

@@ -16,8 +16,16 @@ Route::middleware(['login'])->group(function(){
 	Route::get('/order','Home\OrderController@index');
 });
 
+Route::get('/pay','Pay\AliPayController@pay');
+
+//------------------后台
+Route::get('/admin','Admin\IndexController@index');
+
+Route::get('admin/goods_list','Admin\GoodsController@index');
 Route::get('/add_goods','Admin\GoodsController@add_goods');
 Route::post('/do_add_goods','Admin\GoodsController@do_add_goods');
+
+
 
 Route::get('login','LoginController@login'); //登录
 Route::post('do_login','LoginController@do_login'); //登录表单提交验证

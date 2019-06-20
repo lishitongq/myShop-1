@@ -29,6 +29,7 @@ class LoginController extends Controller
             'user_name'=>$user_info['name']
         ];
         session(['user'=>$user]);
+        session(['user_name'=>$user_info['name']]);
         return redirect('/');
     	
     }
@@ -59,7 +60,7 @@ class LoginController extends Controller
     }
 
     public function logout(Request $request){
-		//$request->session()->flush();
+		$request->session()->flush();
     	return redirect('/');
     }
 }

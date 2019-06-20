@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use DB;
 
 class IndexController extends Controller
@@ -18,6 +19,7 @@ class IndexController extends Controller
         DB::connection()->enableQueryLog(); 
         //$student_info = \DB::table('student')->where(['id'=>'8'])->get();
          $info = DB::table("student")->select(['name','sex'])->leftJoin('class','class.id','=','student.class_id')->get();
+
         // $log = DB::getQueryLog();
 
 
