@@ -17,7 +17,7 @@ Route::middleware(['login'])->group(function(){
 });
 
 Route::get('/pay','Pay\AliPayController@pay');
-
+Route::post('/notify_url','Pay\AliPayController@aliNotify');
 //------------------后台
 Route::get('/admin','Admin\IndexController@index');
 
