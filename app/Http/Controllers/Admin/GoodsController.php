@@ -15,6 +15,8 @@ class GoodsController extends Controller
         return view('admin.goods_list',['goods_list'=>$info]);
     }
 
+    
+
     public function add_goods(){
     	return view('admin.add_goods');
     }
@@ -28,14 +30,13 @@ class GoodsController extends Controller
     public function do_add_goods(Request $request){
     	//goods/or4QMjUOfSPCvz9Q5G7acZlnMp674IgMfn4SNVD6.jpeg
     	$req = $request->all();
-        // dd($_FILES);
-        // dd($request->file('goods_source'));
+        
 		$path = $request->file('goods_source')->store('goods');
-        dd(env('APP_URL',''));
-		$pic_url = asset('storage'.'/'.$path);
+        
+		//$pic_url = asset('storage'.'/'.$path);
         $result = Goods::insert([
             'goods_name'=>$req['goods_name'],
-            'goods_pic'=>$pic_url,
+            'goods_pic'=>'storage/'.$path,
             'goods_price'=>$req['price'],
             'add_time'=>time()
         ]);

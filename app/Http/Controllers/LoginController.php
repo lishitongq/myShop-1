@@ -12,26 +12,28 @@ class LoginController extends Controller
     	return view('login');
     }
     public function do_login(Request $request){
-    	$validatedData = $request->validate([
-            'name' => 'required',
-            'password' => 'required'
-        ]);
+    	// $validatedData = $request->validate([
+     //        'name' => 'required',
+     //        'password' => 'required'
+     //    ]);
         $req = $request->all();
-        $user_info = User::where(['name'=>$req['name'],'password'=>md5($req['password'])])
+        if(empty($req['user_name']) || empty($req['password'])){
+            die(json_encode(['errno'=>0,'msg'=>'用户名和密码必填！']));
+        }
+        $user_info = User::where(['name'=>$req['user_name'],'password'=>md5($req['password'])])
         ->select('id','name')
         ->first();
         if(empty($user_info)){
-            echo '用户或密码错误！';
+            echo json_encode(['errno'=>0,'msg'=>'账号或密码错误！']);
             die();
         }
         $user = [
             'id'=>$user_info['id'],
             'user_name'=>$user_info['name']
         ];
-        session(['user'=>$user]);
+        session(['user_id'=>$user_info['id']]);
         session(['user_name'=>$user_info['name']]);
-        return redirect('/');
-    	
+        echo json_encode(['errno'=>200,'msg'=>'登陆成功！']);
     }
 
     public function register(){

@@ -4,9 +4,17 @@ namespace App\Http\Controllers\Pay;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\BasicController;
+use App\Http\Model\Cart;
+use App\Http\Model\Order;
+use App\Http\Model\OrderDetail;
+use DB;
 
-class AliPayController extends Controller
+class AliPayController extends BasicController
 {
+    public $cart_table;
+    public $order_table;
+    public $order_detail_table;
     public $app_id;
     public $gate_way;
     public $notify_url;
@@ -15,12 +23,29 @@ class AliPayController extends Controller
     public $aliPubKey = '';  //路径
     public $privateKey = 'MIIEowIBAAKCAQEAm5kw4eTAhVGlDOMvj6e9o+DSzBmSINYMebDJ8vgjz7GKep5Y0b6bCTqr20CXLaETxmYpR2gKqM9pAp8cYlTxSQxLLsaO1F892V9GNcttNHZZdzPpWKWoSqcQEvUhhgxP15JnCAs9+SU3es4t9ZcO7LM/Iu+A5KpPKnBVgTR5DyrF+EljHiAG5RF0YyQaecDhzLfuoYXb3d9v9UwF3u15ldWgspM3ZKpLYilVViZYuvJoY/ocbh2FRLNVgaxI/SnBF/5d75AwInhLajubusiPuTlYb3742aGO/XRdC4geqmU1YmBlnxt+UXUrlbFqVv40hDLljhHPVGrtDv4WH0xEMQIDAQABAoIBAA+eFqv1u+Ulxr0+aF2w5nX2cPIPdv1YvrPQLNT4Vw/XsCCSmDOlQAZzHyDIoOPxkPyO8IG8TaWX++BJfB3ajMVaOImfYGKslJam23M20eU8I8q1KSy+o9+qWRCuDglYXwMyLKlAB55kP+dRnodR/CuB6kplY7iP55ZI5CwtyiDdcCBgOXNlzPt5mDOjlzAvm9KlmTB7DTcX7c2jnx1gHW20R37u8C+0xFzWuq8unPYfnzoQUHbFiMqONaQuW1aSUH+eQZ1mK/sP3G+hY2ZI8G7uk3932/vCnUYbla/Iz0O4xp+P0vf72aeUUwRHBqJjK3uvZwZVHQpLhe1ugJBqsuECgYEAzYXvK/bA2uwOqA/JSQHzhiDqFCt+9G0OqE+DD3gtDUS7ol0EyIlWd5SKWXVjBRl2Jr3nBCyZDCt7uTMgDwxq7Or9KXHg5DAB6nV8TjrkzlEYPbRfJpnSmQLehDif+lUeYHvc+kuTV8wmIBe8r59ZCoFNZewp9Xpml2k1xBGI1n0CgYEAwdBJLSC1AlvqwnhpkyFzsQvgEruaLhwCK5rVJz46v69y/YI3hn5a6F32fT5ZJ2RIwTudJ2Q7Zx11j0sLlVxTw4WNQqudpvdfR/2gmHe0K5Q4+6xIZQ+u2j3NMiAZmrMk9bvXncVfdOxJGzD5rOKyFvx6wkUK+qStiiYxobij7sUCgYEAoMkCNqvBbsO0J6jJ+RLMuIcxeXwZwxE6oVQrHUQQQswd2sTYxCYlfkG4Bop+X/PuahqxC6P0TAAMt/OWRg+Z6yVfzzenD/260fj9uZn7fKkWxNdChUlb55bGDDzccxR6QlNEqo/LgqlUvlCzrdWE7GIB8hXTMZeDgTqu9GgfXGUCgYA7q3WsCCLSXBw1zT6rxqPIwWA2RD3erk7Yv+2aDGWn+EtN01Zm+OXiHnOx8Y0fPJfNrh3fL9O+FmrIOBGT5X4Ad1CbUxzRd92E24gjCM+WjybQDSWov6BUnqxbH1jisP7TDQcAEvElnU2Qqo5j9NNhkk/1Ga6cpjCrlMC5CpCmBQKBgCNSi0MFvIGqi+SDqLoY1Ch1KtgYweOj47gaWLR72EaLqGZec77By5Pacfe8EtxRZ8L/gzN2ps5gRTahnYx9iYFxKZFCY2+g7MrfbADp2k28ERl5ce/wGcI9qy1mP0CDhkQMsCCdPGHwD6K44SUgzy95SvvcHRzi8kd1j0q/OEmn';
     public $publicKey = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm5kw4eTAhVGlDOMvj6e9o+DSzBmSINYMebDJ8vgjz7GKep5Y0b6bCTqr20CXLaETxmYpR2gKqM9pAp8cYlTxSQxLLsaO1F892V9GNcttNHZZdzPpWKWoSqcQEvUhhgxP15JnCAs9+SU3es4t9ZcO7LM/Iu+A5KpPKnBVgTR5DyrF+EljHiAG5RF0YyQaecDhzLfuoYXb3d9v9UwF3u15ldWgspM3ZKpLYilVViZYuvJoY/ocbh2FRLNVgaxI/SnBF/5d75AwInhLajubusiPuTlYb3742aGO/XRdC4geqmU1YmBlnxt+UXUrlbFqVv40hDLljhHPVGrtDv4WH0xEMQIDAQAB';
-    public function __construct()
+    public function __construct(Cart $cart,Order $order,OrderDetail $orderDetail)
     {
+        $this->cart_table = $cart;
+        $this->order_table = $order;
+        $this->order_detail_table = $orderDetail;
         $this->app_id = '2016092800618146';
         $this->gate_way = 'https://openapi.alipaydev.com/gateway.do';
         $this->notify_url = env('APP_URL').'/notify_url';
         $this->return_url = env('APP_URL').'/return_url';
+    }
+    /**
+     * 确认订单
+     * [confirm_pay description]
+     * @return [type] [description]
+     */
+    public function confirm_pay(){
+        
+        $cart_info = $this->cart_table->where(['uid'=>session('user_id')])->get();
+        $total = 0;
+        foreach($cart_info->toArray() as $v){
+            $total += $v['goods_price'];
+        }
+        return view('home.confirm_pay',['cart_info'=>$cart_info,'total'=>$total]);
     }
     
     
@@ -30,21 +55,14 @@ class AliPayController extends Controller
      */
     public function pay()
     {
-        
-
-    	// file_put_contents(storage_path('logs/alipay.log'),"\nqqqq\n",FILE_APPEND);
-    	// die();
-        //验证订单状态 是否已支付 是否是有效订单
-        //$order_info = OrderModel::where(['oid'=>$oid])->first()->toArray();
-        //判断订单是否已被支付
-        // if($order_info['is_pay']==1){
-        //     die("订单已支付，请勿重复支付");
-        // }
-        //判断订单是否已被删除
-        // if($order_info['is_delete']==1){
-        //     die("订单已被删除，无法支付");
-        // }
+        //生成订单信息
+        //货物信息
+        DB::begintransaction(); //开启事务
+        $cart_info = $this->cart_table->where(['uid'=>session('user_id')])->get();
         $oid = time().mt_rand(1000,1111);  //订单编号
+
+    	
+        
         //业务参数
         $bizcont = [
             'subject'           => 'Lening-Order: ' .$oid,

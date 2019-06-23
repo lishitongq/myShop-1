@@ -15,10 +15,7 @@ class Login
      */
     public function handle($request, Closure $next)
     {
-        echo 1111;
-        var_dump(session('name'));
-        die();
-        if(!$request->session()->exists('name')){
+        if(!$request->session()->exists('user_name')){
             return redirect('/login');
         }
         return $next($request);
