@@ -153,7 +153,11 @@ class AliPayController extends BasicController
      * @return [type]      [description]
      */
     public function ali_pay($oid){
-        $order = $this->order_table->where(['oid'=>$oid])->select(['pay_money'])->first();
+        $order = $this->order_table->where(['oid'=>$oid,'state'=>1])->select(['pay_money'])->first();
+        if(empty($order)){
+            echo "订单不存在!";
+            die();
+        }
         $order_info = $order->toArray();
         //业务参数
         $bizcont = [
