@@ -12,7 +12,7 @@ use DB;
 
 class AliPayController extends BasicController
 {
-    public $cart_table;
+    public $cart_table; 
     public $order_table;
     public $order_detail_table;
     public $app_id;
@@ -297,7 +297,9 @@ class AliPayController extends BasicController
         
         ($res) or die('支付宝RSA公钥错误。请检查公钥文件格式是否正确');
         //调用openssl内置方法验签，返回bool值
-        $result = (openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256)===1);
+        $result = (bool)openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256);
+        \Log::Info(json_encode($result));
+        // $result = (openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256)===1);
         if(!$this->checkEmpty($this->aliPubKey)){
             openssl_free_key($res);
         }
