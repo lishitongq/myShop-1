@@ -43,6 +43,9 @@
 		            data: {goods_id:goods_id},
 		            dataType: "json",
 		            success: function(data){
+		            	if(data.errno == 4013){
+		            		window.location.href = "{{url('/login')}}";
+		            	}
 		            	if(data.errno == 200){
 		                 window.location.href = "{{url('my_cart')}}";    
 		            	}else{

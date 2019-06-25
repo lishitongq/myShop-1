@@ -47,6 +47,17 @@ class AliPayController extends BasicController
         }
         return view('home.confirm_pay',['cart_info'=>$cart_info,'total'=>$total]);
     }
+    /*
+     * 根据订单号支付订单
+     */
+    public function pay_order(Request $request){
+        $req = $request->all();
+        if(empty($req['oid'])){
+            echo "参数错误!";
+            die();
+        }
+        $this->ali_pay($req['oid']);
+    }
     
     
     /**
@@ -57,43 +68,42 @@ class AliPayController extends BasicController
     {
         //生成订单信息
         //货物信息
-        DB::begintransaction(); //开启事务
+        DB::connection('mysql_shop')->beginTransaction(); //开启事务
         $cart_info = $this->cart_table->where(['uid'=>session('user_id')])->get();
-        $oid = time().mt_rand(1000,1111);  //订单编号
-
-    	
-        
-        //业务参数
-        $bizcont = [
-            'subject'           => 'Lening-Order: ' .$oid,
-            'out_trade_no'      => $oid,
-            'total_amount'      => 1,
-            'product_code'      => 'FAST_INSTANT_TRADE_PAY',
-        ];
-        //公共参数
-        $data = [
-            'app_id'   => $this->app_id,
-            'method'   => 'alipay.trade.page.pay',
-            'format'   => 'JSON',
-            'charset'   => 'utf-8',
-            'sign_type'   => 'RSA2',
-            'timestamp'   => date('Y-m-d H:i:s'),
-            'version'   => '1.0',
-            'notify_url'   => $this->notify_url,        //异步通知地址
-            'return_url'   => $this->return_url,        // 同步通知地址
-            'biz_content'   => json_encode($bizcont),
-        ];
-        //签名
-        $sign = $this->rsaSign($data);
-        $data['sign'] = $sign;
-        $param_str = '?';
-        foreach($data as $k=>$v){
-            $param_str .= $k.'='.urlencode($v) . '&';
+        $total = 0;
+        foreach($cart_info->toArray() as $v){
+            $total += $v['goods_price'];
         }
-        $url = rtrim($param_str,'&');
-        $url = $this->gate_way . $url;
-        
-        header("Location:".$url);
+        $oid = time().mt_rand(1000,1111);  //订单编号
+        $order_result = $this->order_table->insert([
+            'oid'=>$oid,
+            'uid'=>session('user_id'),
+            'pay_money'=>$total,
+            'add_time'=>time()
+        ]);
+        $order_detali_result = true;
+        foreach($cart_info->toArray() as $v){
+            $detail_result = $this->order_detail_table->insert([
+                'oid'=>$oid,
+                'goods_id'=>$v['goods_id'],
+                'goods_name'=>$v['goods_name'],
+                'goods_pic'=>$v['goods_pic'],
+                'add_time'=>time()
+            ]);
+            if(!$detail_result){
+                $order_detali_result = false;
+                break;
+            }
+        }
+
+        if(!$order_detali_result || !$order_result){
+             DB::connection('mysql_shop')->rollBack();
+            die('操作失败!');
+        }
+
+        DB::connection('mysql_shop')->commit();
+        $this->ali_pay($oid);
+    	
     }
     public function rsaSign($params) {
         return $this->sign($this->getSignContent($params));
@@ -136,6 +146,48 @@ class AliPayController extends BasicController
         unset ($k, $v);
         return $stringToBeSigned;
     }
+    /**
+     * 根据订单号支付
+     * [ali_pay description]
+     * @param  [type] $oid [description]
+     * @return [type]      [description]
+     */
+    public function ali_pay($oid){
+        $order = $this->order_table->where(['oid'=>$oid])->select(['pay_money'])->first();
+        $order_info = $order->toArray();
+        //业务参数
+        $bizcont = [
+            'subject'           => 'Lening-Order: ' .$oid,
+            'out_trade_no'      => $oid,
+            'total_amount'      => $order_info['pay_money'],
+            'product_code'      => 'FAST_INSTANT_TRADE_PAY',
+        ];
+        //公共参数
+        $data = [
+            'app_id'   => $this->app_id,
+            'method'   => 'alipay.trade.page.pay',
+            'format'   => 'JSON',
+            'charset'   => 'utf-8',
+            'sign_type'   => 'RSA2',
+            'timestamp'   => date('Y-m-d H:i:s'),
+            'version'   => '1.0',
+            'notify_url'   => $this->notify_url,        //异步通知地址
+            'return_url'   => $this->return_url,        // 同步通知地址
+            'biz_content'   => json_encode($bizcont),
+        ];
+        //签名
+        $sign = $this->rsaSign($data);
+        $data['sign'] = $sign;
+        $param_str = '?';
+        foreach($data as $k=>$v){
+            $param_str .= $k.'='.urlencode($v) . '&';
+        }
+        $url = rtrim($param_str,'&');
+        $url = $this->gate_way . $url;
+        
+        header("Location:".$url);
+    }
+
     protected function checkEmpty($value) {
         if (!isset($value))
             return true;
@@ -165,22 +217,8 @@ class AliPayController extends BasicController
      */
     public function aliReturn()
     {
-        header('Refresh:2;url=/order/list');
-        echo "订单： ".$_GET['out_trade_no'] . ' 支付成功，正在跳转';
-//        echo '<pre>';print_r($_GET);echo '</pre>';die;
-//        //验签 支付宝的公钥
-//        if(!$this->verify($_GET)){
-//            die('簽名失敗');
-//        }
-//
-//        //验证交易状态
-////        if($_GET['']){
-////
-////        }
-////
-//
-//        //处理订单逻辑
-//        $this->dealOrder($_GET);
+        header('Refresh:2;url=/order_list');
+        echo "<h2>订单： ".$_GET['out_trade_no'] . ' 支付成功，正在跳转</h2>';
     }
     /**
      * 支付宝异步通知

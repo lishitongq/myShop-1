@@ -11,9 +11,8 @@ use App\Http\Controllers\BasicController;
 class CartController extends BasicController
 {
     public function cart(){
-
     	$cart_info = Cart::where(['uid'=>session('user_id')])->get();
-    	$total = 0;
+   	 	$total = 0;
     	foreach($cart_info->toArray() as $v){
     		$total += $v['goods_price'];
     	}
@@ -21,15 +20,16 @@ class CartController extends BasicController
     	
     	return view('home.cart',['cart_info'=>$cart_info,'total'=>$total]);
     }
-
+    /**
+     * 加入购物车
+     * [add_cart description]
+     * @param Request $request [description]
+     */
     public function add_cart(Request $request){
     	$req = $request->all();
     	$uid = session('user_id');
     	//判断购物车有没有重复的
     	$cart_info = Cart::where(['uid'=>$uid])->select(['goods_id'])->get()->toArray();
-
-
-    	
     	$cart_goods_arr = [];
     	if(!empty($cart_info)){
     		foreach($cart_info as $v){
@@ -40,7 +40,7 @@ class CartController extends BasicController
     	if(in_array($req['goods_id'],$cart_goods_arr)){
     		die(json_encode(['errno'=>0,'msg'=>'购物车已存在该商品']));
     	}
-    	
+
     	$goods_info = Goods::where(['id'=>$req['goods_id']])->select(['id','goods_pic','goods_name','goods_price'])->first();
 
     	$goods = $goods_info->toArray();

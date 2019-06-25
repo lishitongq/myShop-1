@@ -23,13 +23,15 @@ class IndexController extends BasicController
        
     	
         $new_info = Goods::orderBy('add_time','desc')->limit(4)->get()->toArray();
+       
         $info = Goods::paginate(4);
 
         
         $new = $this->handle_double($new_info,$cart_goods_arr);
         $n_info = $this->handle_double($info->toArray()['data'],$cart_goods_arr);
         
-    	return view('index',['new_goods'=>$new,'goods'=>$n_info,'info'=>$info]);
+        
+    	return view('index',['new_goods'=>$new,'goods'=>$n_info,'info'=>$info,'time_now'=>'2019/6/23 21:30:18']);
     }
 
     public function handle_double($info,$cart_goods_arr){

@@ -20,12 +20,22 @@ Route::get('register','LoginController@register'); //注册
 Route::post('do_register','LoginController@do_register'); //表单验证
 Route::get('logout','LoginController@logout'); //退出
 
+Route::middleware(['apilogin'])->group(function(){
+	Route::post('add_cart','Home\CartController@add_cart'); //加入购物车
+});
+
 Route::middleware(['login'])->group(function(){
 	Route::get('/order','Home\OrderController@index');
 	//购物车相关路由
 	Route::get('my_cart','Home\CartController@cart');
-	Route::post('add_cart','Home\CartController@add_cart'); //加入购物车
+	
 	Route::get('confirm_pay','Pay\AliPayController@confirm_pay'); //确认订单
+
+	Route::get('order_list','Home\OrderController@order_list');
+
+	//支付相关路由
+	Route::get('/pay','Pay\AliPayController@pay');
+	Route::get('pay_order','Pay\AliPayController@pay_order'); //根据订单号支付订单
 });
 
 //商品相关路由
@@ -33,9 +43,9 @@ Route::get('goods_detail',"Home\GoodsController@goods_detail");
 
 
 
-//支付相关路由
-Route::get('/pay','Pay\AliPayController@pay');
-Route::post('/notify_url','Pay\AliPayController@aliNotify');
+
+Route::post('/notify_url','Pay\AliPayController@aliNotify'); //支付宝异步回调地址
+Route::get('/return_url','Pay\AliPayController@aliReturn'); //支付宝同步回调地址
 
 
 //------------------后台
