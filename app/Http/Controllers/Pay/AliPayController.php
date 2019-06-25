@@ -254,6 +254,7 @@ class AliPayController extends BasicController
                 'state'         => 2
             ];
             $order_result = $this->order_table = where(['oid'=>$oid])->update($info);
+            \Log::Info('111111');
             //清理购物车
             $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
             $goods_list = [];
@@ -276,8 +277,7 @@ class AliPayController extends BasicController
     //验签
     function verify($params) {
         $sign = $params['sign'];
-        $params['sign_type'] = null;
-        $params['sign'] = null;
+        
 
         if($this->checkEmpty($this->aliPubKey)){
             $pubKey= $this->publicKey;
