@@ -258,7 +258,7 @@ class AliPayController extends BasicController
                 'state'         => 2
             ];
             $order_result = $this->order_table->where(['oid'=>$oid])->update($info);
-            \Log::Info('111111');
+            
             //清理购物车
             $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
             $goods_list = [];
@@ -298,7 +298,7 @@ class AliPayController extends BasicController
         ($res) or die('支付宝RSA公钥错误。请检查公钥文件格式是否正确');
         //调用openssl内置方法验签，返回bool值
         $result = (bool)openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256);
-        \Log::Info('#####'.json_encode($result).'######');
+        \Log::Info(json_encode($result));
         // $result = (openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256)===1);
         if(!$this->checkEmpty($this->aliPubKey)){
             openssl_free_key($res);
