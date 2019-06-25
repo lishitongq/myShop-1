@@ -246,14 +246,27 @@ class AliPayController extends BasicController
         }
         //验证订单交易状态
         if($_POST['trade_status']=='TRADE_SUCCESS'){
+            DB::connection('mysql_shop')->beginTransaction(); //开启事务
             //更新订单状态
             $oid = $_POST['out_trade_no'];     //商户订单号
             $info = [
                 'pay_time'      => strtotime($_POST['gmt_payment']), //支付时间
                 'state'         => 2
             ];
-            $this->order_table = where(['oid'=>$oid])->update($info);
-            
+            $order_result = $this->order_table = where(['oid'=>$oid])->update($info);
+            //清理购物车
+            $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
+            $goods_list = [];
+            foreach($order_detail_info as $v){
+                $goods_list[] = $v->goods_id;
+            }
+            $cart_result = $this->cart_table->whereIn('goods_id',$goods_list)->delete();
+            if($cart_result && $order_result){
+                DB::connection('mysql_shop')->commit();
+            }else{
+                file_put_contents(storage_path('logs/alipay.log'),'订单：'.$oid."；支付失败",FILE_APPEND);
+                DB::connection('mysql_shop')->rollBack();
+            }
         }
         
         echo 'success';
