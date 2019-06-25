@@ -240,39 +240,39 @@ class AliPayController extends BasicController
         //验签
         $res = $this->verify($_POST);
         $log_str = '>>>> ' . date('Y-m-d H:i:s');
-        if($res === false){
+        if($res){
             //记录日志 验签失败
             $log_str .= " Sign Failed!<<<<< \n\n";
             file_put_contents(storage_path('logs/alipay.log'),$log_str,FILE_APPEND);
         }else{
             $log_str .= " Sign OK!<<<<< \n\n";
             file_put_contents(storage_path('logs/alipay.log'),$log_str,FILE_APPEND);
-        }
-        //验证订单交易状态
-        if($_POST['trade_status']=='TRADE_SUCCESS'){
-            DB::connection('mysql_shop')->beginTransaction(); //开启事务
-            //更新订单状态
-            $oid = $_POST['out_trade_no'];     //商户订单号
-            $info = [
-                'pay_time'      => strtotime($_POST['gmt_payment']), //支付时间
-                'state'         => 2
-            ];
-            $order_result = $this->order_table->where(['oid'=>$oid])->update($info);
-            
-            //清理购物车
-            $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
-            $goods_list = [];
-            foreach($order_detail_info as $v){
-                $goods_list[] = $v['goods_id'];
-            }
-            $cart_result = $this->cart_table->whereIn('goods_id',$goods_list)->delete();
-            file_put_contents(storage_path('logs/alipay.log'),$order_result,FILE_APPEND);
-            file_put_contents(storage_path('logs/alipay.log'),$cart_result,FILE_APPEND);
-            if($cart_result && $order_result){
-                DB::connection('mysql_shop')->commit();
-            }else{
-                file_put_contents(storage_path('logs/alipay.log'),'订单：'.$oid."；支付失败",FILE_APPEND);
-                DB::connection('mysql_shop')->rollBack();
+            //验证订单交易状态
+            if($_POST['trade_status']=='TRADE_SUCCESS'){
+                DB::connection('mysql_shop')->beginTransaction(); //开启事务
+                //更新订单状态
+                $oid = $_POST['out_trade_no'];     //商户订单号
+                $info = [
+                    'pay_time'      => strtotime($_POST['gmt_payment']), //支付时间
+                    'state'         => 2
+                ];
+                $order_result = $this->order_table->where(['oid'=>$oid])->update($info);
+                
+                //清理购物车
+                $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
+                $goods_list = [];
+                foreach($order_detail_info as $v){
+                    $goods_list[] = $v['goods_id'];
+                }
+                $cart_result = $this->cart_table->whereIn('goods_id',$goods_list)->delete();
+                file_put_contents(storage_path('logs/alipay.log'),$order_result,FILE_APPEND);
+                file_put_contents(storage_path('logs/alipay.log'),$cart_result,FILE_APPEND);
+                if($cart_result && $order_result){
+                    DB::connection('mysql_shop')->commit();
+                }else{
+                    file_put_contents(storage_path('logs/alipay.log'),'订单：'.$oid."；支付失败",FILE_APPEND);
+                    DB::connection('mysql_shop')->rollBack();
+                }
             }
         }
         
@@ -298,8 +298,7 @@ class AliPayController extends BasicController
         ($res) or die('支付宝RSA公钥错误。请检查公钥文件格式是否正确');
         //调用openssl内置方法验签，返回bool值
         $result = (bool)openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256);
-        \Log::Info(json_encode($result));
-        // $result = (openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256)===1);
+
         if(!$this->checkEmpty($this->aliPubKey)){
             openssl_free_key($res);
         }
