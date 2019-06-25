@@ -253,7 +253,7 @@ class AliPayController extends BasicController
                 'pay_time'      => strtotime($_POST['gmt_payment']), //支付时间
                 'state'         => 2
             ];
-            $order_result = $this->order_table = where(['oid'=>$oid])->update($info);
+            $order_result = $this->order_table->where(['oid'=>$oid])->update($info);
             \Log::Info('111111');
             //清理购物车
             $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
