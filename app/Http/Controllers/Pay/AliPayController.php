@@ -70,6 +70,10 @@ class AliPayController extends BasicController
         //货物信息
         DB::connection('mysql_shop')->beginTransaction(); //开启事务
         $cart_info = $this->cart_table->where(['uid'=>session('user_id')])->get();
+        if(empty($cart_info)){
+            echo "购物车为空！";
+            die();
+        }
         $total = 0;
         foreach($cart_info->toArray() as $v){
             $total += $v['goods_price'];
