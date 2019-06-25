@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
          $schedule->call(function () {
             $order_info = DB::connection("mysql_shop")->table("order")->where(['state'=>1])->where('add_time','<',time() - 600)->select(['id'])->get();
             foreach($order_info->toArray() as $v){
-                DB::connection("mysql_shop")->table("order")->where(['id'=>$v['id']])->update(['state'=>3]); //设置已过期
+                DB::connection("mysql_shop")->table("order")->where(['id'=>$v->id])->update(['state'=>3]); //设置已过期
             }
         })->everyMinute();
     }
