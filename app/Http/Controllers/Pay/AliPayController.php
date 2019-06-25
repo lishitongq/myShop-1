@@ -277,11 +277,12 @@ class AliPayController extends BasicController
     //验签
     function verify($params) {
         $sign = $params['sign'];
+
         if($this->checkEmpty($this->aliPubKey)){
             $pubKey= $this->publicKey;
-            $res = "-----BEGIN RSA PUBLIC KEY-----\n" .
+            $res = "-----BEGIN PUBLIC KEY-----\n" .
                 wordwrap($pubKey, 64, "\n", true) .
-                "\n-----END RSA PUBLIC KEY-----";
+                "\n-----END PUBLIC KEY-----";
         }else {
             //读取公钥文件
             $pubKey = file_get_contents($this->aliPubKey);
@@ -289,8 +290,7 @@ class AliPayController extends BasicController
             $res = openssl_get_publickey($pubKey);
         }
         
-        //转换为openssl格式密钥
-        $res = openssl_get_publickey($pubKey);
+        
         ($res) or die('支付宝RSA公钥错误。请检查公钥文件格式是否正确');
         //调用openssl内置方法验签，返回bool值
         $result = (openssl_verify($this->getSignContent($params), base64_decode($sign), $res, OPENSSL_ALGO_SHA256)===1);
