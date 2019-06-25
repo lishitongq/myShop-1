@@ -265,8 +265,7 @@ class AliPayController extends BasicController
                     $goods_list[] = $v['goods_id'];
                 }
                 $cart_result = $this->cart_table->whereIn('goods_id',$goods_list)->delete();
-                file_put_contents(storage_path('logs/alipay.log'),$order_result,FILE_APPEND);
-                file_put_contents(storage_path('logs/alipay.log'),$cart_result,FILE_APPEND);
+                
                 if($cart_result && $order_result){
                     DB::connection('mysql_shop')->commit();
                 }else{
