@@ -259,7 +259,7 @@ class AliPayController extends BasicController
             $order_detail_info = $this->order_detail_table->where(['oid'=>$oid])->select(['goods_id'])->get()->toArray();
             $goods_list = [];
             foreach($order_detail_info as $v){
-                $goods_list[] = $v->goods_id;
+                $goods_list[] = $v['goods_id'];
             }
             $cart_result = $this->cart_table->whereIn('goods_id',$goods_list)->delete();
             file_put_contents(storage_path('logs/alipay.log'),$order_detail_info,FILE_APPEND);
