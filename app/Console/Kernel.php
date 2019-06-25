@@ -25,13 +25,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
          $schedule->call(function () {
-            DB::
+            $order_info = DB::connection("mysql_shop")->table("order")->where(['state'=>1])->where('add_time','<',time() - 600)->select(['id'])->get();
+            foreach($order_info as $v){
+                DB::connection("mysql_shop")->table("order")->where(['id'=>$v['id']])->update(['state'=>3]); //设置已过期
+            }
         })->everyMinute();
-
-
     }
 
     /**
